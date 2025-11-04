@@ -32,6 +32,24 @@ else
 	OSFLAGS := -DUNIX
 endif
 
+# Per-platform extensions and link flags
+ifeq ($(OS_IS_WINDOWS),1)
+	# Windows (MinGW/MSYS/Cygwin) style
+	EXEEXT := .exe
+	DLL_EXT := .dll
+	# Use --out-implib on Windows to produce an import lib and --kill-at for stdcall name decorations
+	DLL_OUT_FLAGS := -shared -Wl,--out-implib,libzzlib.a,--kill-at
+	PICFLAGS :=
+else
+	# Unix/Linux style
+	EXEEXT :=
+	DLL_EXT := .so
+	# Set SONAME on linux
+	DLL_OUT_FLAGS := -shared -Wl,-soname,libzzlib.so
+	# Compile position-independent code for shared libraries
+	PICFLAGS := -fPIC
+endif
+
 # CPU arch flags (x86_64 vs x86)
 ifeq ($(UNAME_M),x86_64)
 	ARCH_FLAGS := -march=x86-64 -mtune=generic -malign-double -m64
@@ -47,7 +65,7 @@ endif
 # C standard to use with GCC/Clang
 STD := -std=gnu99
 
-CFLAGS		= $(ARCH_FLAGS) $(OPTFLAGS) $(OSFLAGS) $(WARNING) -c $(STD)
+CFLAGS		= $(ARCH_FLAGS) $(OPTFLAGS) $(OSFLAGS) $(WARNING) $(PICFLAGS) -c $(STD)
 LFLAGS		= $(ARCH_FLAGS)
 
 OBJS		= coding.o struct_model0.o struct_model1.o
@@ -55,10 +73,10 @@ OBJS_SFX	= zzipstub.o coding-sfx.o struct_model0-sfx.o struct_model1-sfx.o block
 OBJS_ZZIP	= $(OBJS) zzip.o block.o bwt.o
 OBJS_ZZLIB	= $(OBJS) bwt-dll.o block-dll.o
 
-ZZIP_EXE	= zzip.exe
-MAKE_H_EXE	= make_h.exe
-SFX_EXE		= zzip-sfx.exe
-ZZLIB_DLL	= zzlib.dll
+ZZIP_EXE	= zzip$(EXEEXT)
+MAKE_H_EXE	= make_h$(EXEEXT)
+SFX_EXE		= zzip-sfx$(EXEEXT)
+ZZLIB_DLL	= zzlib$(DLL_EXT)
 ZZLIB_A		= libzz.a
 
 all : $(ZZIP_EXE)
@@ -95,7 +113,7 @@ zzipstub.sfx : $(OBJS_SFX)
 	$(MAKE_H_EXE) zzipstub.sfx > sfx_code.h
 
 $(ZZLIB_DLL) : $(OBJS_ZZLIB)
-	$(LD) $(LFLAGS) -shared -Wl,--out-implib,libzzlib.a,--kill-at -o $(ZZLIB_DLL) $(OBJS_ZZLIB)
+	$(LD) $(LFLAGS) $(DLL_OUT_FLAGS) -o $(ZZLIB_DLL) $(OBJS_ZZLIB)
 	$(STRIP) $(ZZLIB_DLL)
 
 lib : $(OBJS_ZZLIB)
