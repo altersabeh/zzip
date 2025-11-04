@@ -76,8 +76,18 @@ OBJS_ZZLIB	= $(OBJS) bwt-dll.o block-dll.o
 ZZIP_EXE	= zzip$(EXEEXT)
 MAKE_H_EXE	= make_h$(EXEEXT)
 SFX_EXE		= zzip-sfx$(EXEEXT)
-ZZLIB_DLL	= zzlib$(DLL_EXT)
+ZZLIB_DLL	= libzz$(DLL_EXT)
 ZZLIB_A		= libzz.a
+
+# Installation paths (override with `make PREFIX=/your/prefix` or `make DESTDIR=/tmp/stage`)
+PREFIX ?= /usr/local
+DESTDIR ?=
+INSTALL = install
+BINDIR = $(PREFIX)/bin
+LIBDIR = $(PREFIX)/lib
+INCLUDEDIR = $(PREFIX)/include
+
+.PHONY: all sfx dll lib clean install uninstall
 
 all : $(ZZIP_EXE)
 
@@ -87,6 +97,27 @@ dll : $(ZZLIB_DLL)
 
 clean :
 	rm -f *.o zzipstub.sfx sfx_code.h $(ZZIP_EXE) $(MAKE_H_EXE) $(SFX_EXE) $(ZZLIB_DLL) libzzlib.a $(ZZLIB_A)
+
+install: all dll lib
+	@echo "Installing to $(DESTDIR)$(PREFIX)"
+	@mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL) -m 0755 $(ZZIP_EXE) $(DESTDIR)$(BINDIR)/
+	@# Libraries
+	$(INSTALL) -m 0644 $(ZZLIB_DLL) $(DESTDIR)$(LIBDIR)/
+	-$(INSTALL) -m 0644 libzzlib.a $(DESTDIR)$(LIBDIR)/
+	@# Headers (if present)
+	-$(INSTALL) -m 0644 zzip.h $(DESTDIR)$(INCLUDEDIR)/
+	-$(INSTALL) -m 0644 zzlib.h $(DESTDIR)$(INCLUDEDIR)/
+
+uninstall:
+	@echo "Removing from $(DESTDIR)$(PREFIX)"
+	-rm -f $(DESTDIR)$(BINDIR)/zzip$(EXEEXT)
+	-rm -f $(DESTDIR)$(BINDIR)/make_h$(EXEEXT)
+	-rm -f $(DESTDIR)$(BINDIR)/zzip-sfx$(EXEEXT)
+	-rm -f $(DESTDIR)$(LIBDIR)/$(notdir $(ZZLIB_DLL))
+	-rm -f $(DESTDIR)$(LIBDIR)/libzzlib.a
+	-rm -f $(DESTDIR)$(INCLUDEDIR)/zzip.h
+	-rm -f $(DESTDIR)$(INCLUDEDIR)/zzlib.h
 
 $(MAKE_H_EXE) : make_h.c
 	$(LD) $(LFLAGS) -o $(MAKE_H_EXE) make_h.c
