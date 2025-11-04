@@ -39,6 +39,8 @@
 #include <time.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 
 #ifdef __GNUC__
 # define INLINE   __inline__
@@ -72,7 +74,7 @@
 #define FEATURE_MMX			0x00000020
 #define FEATURE_CMOV		0x00000040
 
-#define ROUND32(a)		(((uint32)(a+32))&(~31UL))
+#define ROUND32(a) ((uintptr_t)(((uintptr_t)(a) + (uintptr_t)32) & ~((uintptr_t)31)))
 
 #define VERBOSE			if (verbose == true)
 

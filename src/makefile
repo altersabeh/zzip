@@ -10,13 +10,45 @@ WARNING		= -W -Wall -Wshadow -Wpointer-arith -Winline
 # Optionnal:
 # -fprofile-arcs -fbranch-probabilities
 OPTFLAGS	= -O3 -ffast-math -fforce-addr -fstrict-aliasing -fomit-frame-pointer -foptimize-sibling-calls
-I386		= -march=pentium4 -mtune=pentium4 -malign-double -maccumulate-outgoing-args
-SPARC		= -march=v8
-WINDOWS		= -DWIN32
-UNIX		= -DUNIX
 
-CFLAGS		= $(I386) $(OPTFLAGS) $(WINDOWS) $(WARNING) -c
-LFLAGS		= $(I386)
+# Detect OS and arch automatically
+UNAME_S := $(shell uname -s 2>/dev/null || echo Unknown)
+UNAME_M := $(shell uname -m 2>/dev/null || echo Unknown)
+
+# Windows detection (MSYS/Cygwin/MinGW variants)
+ifneq (,$(findstring MINGW,$(UNAME_S)))
+	OS_IS_WINDOWS := 1
+endif
+ifneq (,$(findstring MSYS,$(UNAME_S)))
+	OS_IS_WINDOWS := 1
+endif
+ifneq (,$(findstring CYGWIN,$(UNAME_S)))
+	OS_IS_WINDOWS := 1
+endif
+
+ifeq ($(OS_IS_WINDOWS),1)
+	OSFLAGS := -DWIN32
+else
+	OSFLAGS := -DUNIX
+endif
+
+# CPU arch flags (x86_64 vs x86)
+ifeq ($(UNAME_M),x86_64)
+	ARCH_FLAGS := -march=x86-64 -mtune=generic -malign-double -m64
+else
+	# default to 32-bit x86 optimizations; if host is not x86, leave empty
+	ifneq (,$(findstring i386,$(UNAME_M)))
+		ARCH_FLAGS := -march=pentium4 -mtune=pentium4 -malign-double -m32
+	else
+		ARCH_FLAGS :=
+	endif
+endif
+
+# C standard to use with GCC/Clang
+STD := -std=gnu99
+
+CFLAGS		= $(ARCH_FLAGS) $(OPTFLAGS) $(OSFLAGS) $(WARNING) -c $(STD)
+LFLAGS		= $(ARCH_FLAGS)
 
 OBJS		= coding.o struct_model0.o struct_model1.o
 OBJS_SFX	= zzipstub.o coding-sfx.o struct_model0-sfx.o struct_model1-sfx.o block-sfx.o
