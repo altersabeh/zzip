@@ -27,6 +27,9 @@
 *.i*86
 *.x86_64
 *.hex
+zzip
+make_h
+zzip-sfx
 
 # Debug files
 *.dSYM/
