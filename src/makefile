@@ -104,7 +104,7 @@ install: all dll lib
 	$(INSTALL) -m 0755 $(ZZIP_EXE) $(DESTDIR)$(BINDIR)/
 	@# Libraries
 	$(INSTALL) -m 0644 $(ZZLIB_DLL) $(DESTDIR)$(LIBDIR)/
-	-$(INSTALL) -m 0644 libzzlib.a $(DESTDIR)$(LIBDIR)/
+	-$(INSTALL) -m 0644 libzz.a $(DESTDIR)$(LIBDIR)/
 	@# Headers (if present)
 	-$(INSTALL) -m 0644 zzip.h $(DESTDIR)$(INCLUDEDIR)/
 	-$(INSTALL) -m 0644 zzlib.h $(DESTDIR)$(INCLUDEDIR)/
