@@ -18,53 +18,51 @@
   Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the 
-  Free Software Foundation, Inc., 
-  59 Temple Place, Suite 330, 
+  License along with this library; if not, write to the
+  Free Software Foundation, Inc.,
+  59 Temple Place, Suite 330,
   Boston, MA 02111-1307 USA
 
   Damien Debin
   <damien@debin.net>
 
-  This program is based on (at least) the work of: Mike Burrows, 
-  David Wheeler, Peter Fenwick, Alistair Moffat, Ian H. Witten, 
-  Robert Sedgewick, Jon Bentley, Brenton Chapin, Stephen R. Tate, 
+  This program is based on (at least) the work of: Mike Burrows,
+  David Wheeler, Peter Fenwick, Alistair Moffat, Ian H. Witten,
+  Robert Sedgewick, Jon Bentley, Brenton Chapin, Stephen R. Tate,
   Szymon Grabowski, Bernhard Balkenhol, Stefan Kurtz
 */
 
 #include <stdio.h>
 
-int main(int  argc, 
-		 char **argv)
-{
-	FILE *f;
-	unsigned char tab[65536];
-	int nb = 0, i;
+int main(int argc, char **argv) {
+  FILE *f;
+  unsigned char tab[65536];
+  int nb = 0, i;
 
-	if (argc == 1) return -1;
+  if (argc == 1)
+    return -1;
 
-	f = fopen(argv[1], "rb");
-	if (f != NULL)
-	{
-		nb = fread(tab, 1, 65536, f);
-		fclose(f);
-	}	
+  f = fopen(argv[1], "rb");
+  if (f != NULL) {
+    nb = fread(tab, 1, 65536, f);
+    fclose(f);
+  }
 
-	printf("#ifndef SFX_CODE\n");
-	printf("#define SFX_CODE\n");
-	printf("#define SFX_CODE_SIZE %dUL\n\n", nb);
-	printf("#ifndef SFX\n");
-	printf("static unsigned char sfx_code[] = {");
+  printf("#ifndef SFX_CODE\n");
+  printf("#define SFX_CODE\n");
+  printf("#define SFX_CODE_SIZE %dUL\n\n", nb);
+  printf("#ifndef SFX\n");
+  printf("static unsigned char sfx_code[] = {");
 
-	for(i = 0; i < nb-1; ++i)
-	{
-		if ((i & 31) == 0) printf("\n");
-		printf("%d,", tab[i]);
-	}
+  for (i = 0; i < nb - 1; ++i) {
+    if ((i & 31) == 0)
+      printf("\n");
+    printf("%d,", tab[i]);
+  }
 
-	printf("%d\n};\n", tab[i]);
-	printf("#endif /* !SFX */\n");
-	printf("#endif /* SFX_CODE */\n\n");
+  printf("%d\n};\n", tab[i]);
+  printf("#endif /* !SFX */\n");
+  printf("#endif /* SFX_CODE */\n\n");
 
-	return 0;
+  return 0;
 }
